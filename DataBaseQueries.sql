@@ -32,30 +32,19 @@ INSERT INTO Department(ID,DeptName,SubDivision) VALUES
 SELECT * FROM Department;
 
 -------Insert joins--------
-
--------Inner Join-------
-SELECT EM.NAME, DT.DeptName
-FROM Employee EM JOIN Department DT
-ON EM.ID = DT.ID;
+SELECT EM.NAME, DT.DeptName FROM Employee EM JOIN Department DT ON EM.ID = DT.ID;
 
 -------Left Join-------
-SELECT EM.NAME, DT.DeptName
-FROM Employee EM LEFT JOIN Department DT
-ON EM.ID = DT.ID;
+SELECT EM.NAME, DT.DeptName FROM Employee EM LEFT JOIN Department DT ON EM.ID = DT.ID;
 
 -------Right Join-------
-SELECT EM.NAME, DT.DeptName
-FROM Employee EM RIGHT JOIN Department DT
-ON EM.ID = DT.ID;
+SELECT EM.NAME, DT.DeptName FROM Employee EM RIGHT JOIN Department DT ON EM.ID = DT.ID;
 
 -------Full Join-------
-SELECT EM.NAME, DT.DeptName
-FROM Employee EM FULL JOIN Department DT
-ON EM.ID = DT.ID;
+SELECT EM.NAME, DT.DeptName FROM Employee EM FULL JOIN Department DT ON EM.ID = DT.ID;
 
 -------Cross Join-------
-SELECT EM.NAME, DT.DeptName
-FROM Employee EM CROSS JOIN Department DT
+SELECT EM.NAME, DT.DeptName FROM Employee EM CROSS JOIN Department DT
 
 SELECT * FROM Employee;
 SELECT * FROM Department;
@@ -93,28 +82,67 @@ GO
 
 SELECT * FROM Department;
 
---------One to One Relation--------
-ALTER TABLE Department ADD CONSTRAINT FK_Employee FOREIGN KEY(ID) REFERENCES Employee(ID) ON DELETE CASCADE ON UPDATE CASCADE
+----------Stored Procedures with Exception ----------
+CREATE TABLE Contact(    
+    ContactID varchar(255),
+    Email varchar(255) not null,
+    City varchar(255)
+);
+INSERT INTO Contact(ContactID, Email, City)
+VALUES ('1', 'mail1@gmail.com', 'Kurnool'),('3', 'mail2@gmail.com', 'Kurnool'),('2', 'mail3@gmail.com', 'Hyd'),('4', 'mail4@gmail.com', 'Hyd');
+SELECT * FROM Contact
+CREATE PROCEDURE SP_Contact (@ContactID varchar(255),@Email varchar(255),@City varchar(30))
+AS
+BEGIN
+SET NOCOUNT ON;
+BEGIN TRY
+INSERT INTO Contact([ContactID],[Email],[City]) VALUES(@ContactID,@Email,@City)
+END TRY
+BEGIN CATCH
+		PRINT('Error! Cannot Insert a NULL Value into the "PersonDetails" Table')
+END CATCH
+END
+GO
 
-SELECT SubDivision,COUNT(SubDivision) FROM Department DT INNER JOIN Employee EMP ON DT.ID = EMP.ID GROUP BY SubDivision
+EXEC dbo.SP_Contact NULL,NULL,NULL;
+GO
 
+---------Triggers---------
+
+CREATE TRIGGER SampTrigger ON Employee 
+FOR INSERT AS
+BEGIN
+Declare @ID int  
+  SELECT @ID = Name from inserted  
+  INSERT INTO Employee VALUES (@ID,2,'C#')
+END;
+INSERT INTO Employee VALUES ('Reshu','2342342342','2020');
+
+SELECT* FROM Department; SELECT * FROM Employee; SELECT * FROM Contact
 
 ---------Functions---------
 SELECT DeptName, COUNT(DeptName) AS Department FROM Department GROUP BY DeptName
+SELECT SubDivision,COUNT(SubDivision) FROM Department DT INNER JOIN Employee EMP ON DT.ID = EMP.ID GROUP BY SubDivision
+SUM, AVG, MAX, MIN
+
+--------One to One Relation--------
+ALTER TABLE Department ADD CONSTRAINT FK_Employee FOREIGN KEY(ID) REFERENCES Employee(ID) ON DELETE CASCADE ON UPDATE CASCADE
 
 
+CREATE TABLE DeptName(    
+    DeptID INT IDENTITY PRIMARY KEY,
+    BatchID varchar(255) not null,
+    ContactPerson varchar(255)
+);
+CREATE TABLE SubDivision(    
+    DivID INT IDENTITY PRIMARY KEY,
+    DivisionHead varchar(255),
+    ContactPerson varchar(255)
+);
+-----------Making Primary Key in Existing Table-----------
+ALTER TABLE Department ADD CONSTRAINT Department_PK PRIMARY KEY (SubDivision);
+ALTER TABLE Contact ADD CONSTRAINT Contact_PK PRIMARY KEY (Email);
 
----------Triggers---------
-CREATE TABLE Employee_Backup (ID int, 
-      Name VARCHAR(40), Contact VARCHAR(40), 
-      StartYear VARCHAR(10), 
-      primary key(ID));
-delimiter $$
-CREATE TRIGGER Backup BEFORE DELETE ON Employee 
-FOR EACH ROW
-BEGIN
-INSERT INTO Employee_Backup
-VALUES (OLD.ID, OLD.Name, 
-        OLD.Contact, OLD.StartYear);
-END; $$
-delimiter; 
+-----------Normalization-----------
+
+
